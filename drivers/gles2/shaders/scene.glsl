@@ -1307,7 +1307,8 @@ LIGHT_SHADER_CODE
 #define SAMPLE_SHADOW_TEXEL(p_shadow, p_pos, p_depth) step(p_depth, texture2D(p_shadow, p_pos).r)
 #define SAMPLE_SHADOW_TEXEL_PROJ(p_shadow, p_pos) step(p_pos.z, texture2DProj(p_shadow, p_pos).r)
 
-float sample_shadow(highp sampler2D shadow, highp vec4 spos) {
+float sample_shadow(
+		highp sampler2D shadow, highp vec4 spos) {
 
 #ifdef SHADOW_MODE_PCF_13
 
@@ -1922,12 +1923,12 @@ FRAGMENT_SHADER_CODE
 		highp vec4 splane = shadow_coord;
 		splane.xyz /= splane.w;
 
-		float shadow = sample_shadow(light_shadow_atlas, splane);
+		float shadow = sample_shadow(light_shadow_atlas, splane.xy, splane.z);
 		light_att *= shadow;
 	}
 #endif
 
-#endif // LIGHT_MODE_SPOT
+#endif
 
 #ifdef USE_VERTEX_LIGHTING
 	//vertex lighting
