@@ -63,6 +63,7 @@ const GodotConfig = {
 		persistent_drops: false,
 		on_execute: null,
 		on_exit: null,
+		on_fs_sync: null,
 
 		init_config: function (p_opts) {
 			GodotConfig.canvas_resize_policy = p_opts['canvasResizePolicy'];
@@ -72,6 +73,7 @@ const GodotConfig = {
 			GodotConfig.persistent_drops = !!p_opts['persistentDrops'];
 			GodotConfig.on_execute = p_opts['onExecute'];
 			GodotConfig.on_exit = p_opts['onExit'];
+			GodotConfig.on_fs_sync = p_opts['onFSSync'];
 			if (p_opts['focusCanvas']) {
 				GodotConfig.canvas.focus();
 			}
@@ -88,6 +90,7 @@ const GodotConfig = {
 			GodotConfig.persistent_drops = false;
 			GodotConfig.on_execute = null;
 			GodotConfig.on_exit = null;
+			GodotConfig.on_fs_sync = null;
 		},
 	},
 
@@ -108,10 +111,12 @@ autoAddDeps(GodotConfig, '$GodotConfig');
 mergeInto(LibraryManager.library, GodotConfig);
 
 const GodotFS = {
-	$GodotFS__deps: ['$FS', '$IDBFS', '$GodotRuntime'],
+	$GodotFS__deps: ['$FS', '$IDBFS', '$GodotRuntime', '$GodotConfig'],
 	$GodotFS__postset: [
 		'Module["initFS"] = GodotFS.init;',
 		'Module["copyToFS"] = GodotFS.copy_to_fs;',
+		'Module["fsReadDir"] = GodotFS.read_dir;',
+		'Module["fsReadFile"] = GodotFS.read_file;',
 	].join(''),
 	$GodotFS: {
 		// ERRNO_CODES works every odd version of emscripten, but this will break too eventually.
@@ -198,6 +203,11 @@ const GodotFS = {
 						GodotRuntime.error(`Failed to save IDB file system: ${error.message}`);
 					}
 					GodotFS._syncing = false;
+
+					if (GodotConfig.on_fs_sync) {
+						GodotConfig.on_fs_sync();
+					}
+
 					resolve(error);
 				});
 			});
@@ -221,6 +231,42 @@ const GodotFS = {
 			}
 			FS.writeFile(path, new Uint8Array(buffer));
 		},
+
+		read_dir: function (path, recursive = false) {
+			let result = {};
+			const entries = FS.readdir(path);
+
+			for (const entry of entries) {
+				if (entry === "." || entry === "..") {
+					continue;
+				}
+
+				const fullPath = path === "/" ? `/${entry}` : `${path}/${entry}`;
+				const stat = FS.stat(fullPath);
+
+				if (FS.isFile(stat.mode)) {
+					// If entry is a file, collect its details
+					result[fullPath] = {
+						path: fullPath,
+						modified: stat.mtime.getTime(),
+						size: stat.size,
+					};
+					continue;
+				}
+
+				if (FS.isDir(stat.mode) && recursive) {
+					// If entry is a directory, traverse it
+					const subdir = GodotFS.read_dir(fullPath, recursive);
+					result = Object.assign(result, subdir);
+				}
+			}
+
+			return result;
+		},
+
+		read_file: function (path, opts) {
+			return FS.readFile(path, opts);
+		}
 	},
 };
 mergeInto(LibraryManager.library, GodotFS);

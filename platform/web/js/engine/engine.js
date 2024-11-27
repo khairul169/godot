@@ -245,6 +245,32 @@ const Engine = (function () {
 				}
 				return Promise.resolve();
 			},
+
+			/**
+			 * Read the contents of the specified directory.
+			 *
+			 * @param {string} path The directory where the files will be read. 
+			 * @param {boolean} recursive Traverses directories recursively.
+			 */
+			fsReadDir: function (path, recursive) {
+				if (this.rtenv) {
+					return this.rtenv['fsReadDir'](path, recursive);
+				}
+				return false;
+			},
+
+			/**
+			 * Read the content of file.
+			 *
+			 * @param {string} path The file where the content will be read.
+			 * @param {object} opts Read options.
+			 */
+			fsReadFile: function (path, opts) {
+				if (this.rtenv) {
+					return this.rtenv['fsReadFile'](path, opts);
+				}
+				return false;
+			},
 		};
 
 		Engine.prototype = proto;
@@ -256,6 +282,8 @@ const Engine = (function () {
 		Engine.prototype['copyToFS'] = Engine.prototype.copyToFS;
 		Engine.prototype['requestQuit'] = Engine.prototype.requestQuit;
 		Engine.prototype['installServiceWorker'] = Engine.prototype.installServiceWorker;
+		Engine.prototype['fsReadDir'] = Engine.prototype.fsReadDir;
+		Engine.prototype['fsReadFile'] = Engine.prototype.fsReadFile;
 		// Also expose static methods as instance methods
 		Engine.prototype['load'] = Engine.load;
 		Engine.prototype['unload'] = Engine.unload;

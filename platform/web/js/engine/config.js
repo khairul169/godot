@@ -212,6 +212,16 @@ const InternalConfig = function (initConfig) { // eslint-disable-line no-unused-
 		onPrintError: function (var_args) {
 			console.error.apply(console, Array.from(arguments)); // eslint-disable-line no-console
 		},
+		/**
+		 * A callback function for being notified when the Filesystem sync is complete.
+		 *
+		 * @callback EngineConfig.onFSSync
+		 */
+		/**
+		 * @ignore
+		 * @type {?function()}
+		 */
+		onFSSync: null,
 	};
 
 	/**
@@ -262,6 +272,7 @@ const InternalConfig = function (initConfig) { // eslint-disable-line no-unused-
 		this.args = parse('args', this.args);
 		this.onExecute = parse('onExecute', this.onExecute);
 		this.onExit = parse('onExit', this.onExit);
+		this.onFSSync = parse('onFSSync', this.onFSSync);
 	};
 
 	/**
@@ -358,6 +369,7 @@ const InternalConfig = function (initConfig) { // eslint-disable-line no-unused-
 					onExit(p_code);
 				}
 			},
+			'onFSSync': this.onFSSync,
 		};
 	};
 	return new Config(initConfig);
