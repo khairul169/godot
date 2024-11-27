@@ -271,6 +271,17 @@ const Engine = (function () {
 				}
 				return false;
 			},
+
+			/**
+			 * Delete the file or directory at the specified path.
+			 * 
+			 * @param {string} path 
+			 */
+			unlinkFS: function (path) {
+				if (this.rtenv) {
+					return this.rtenv['unlinkFS'](path);
+				}
+			}
 		};
 
 		Engine.prototype = proto;
@@ -284,6 +295,7 @@ const Engine = (function () {
 		Engine.prototype['installServiceWorker'] = Engine.prototype.installServiceWorker;
 		Engine.prototype['fsReadDir'] = Engine.prototype.fsReadDir;
 		Engine.prototype['fsReadFile'] = Engine.prototype.fsReadFile;
+		Engine.prototype['unlinkFS'] = Engine.prototype.unlinkFS;
 		// Also expose static methods as instance methods
 		Engine.prototype['load'] = Engine.load;
 		Engine.prototype['unload'] = Engine.unload;

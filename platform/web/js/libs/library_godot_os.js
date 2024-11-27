@@ -117,6 +117,7 @@ const GodotFS = {
 		'Module["copyToFS"] = GodotFS.copy_to_fs;',
 		'Module["fsReadDir"] = GodotFS.read_dir;',
 		'Module["fsReadFile"] = GodotFS.read_file;',
+		'Module["unlinkFS"] = GodotFS.unlink_fs;',
 	].join(''),
 	$GodotFS: {
 		// ERRNO_CODES works every odd version of emscripten, but this will break too eventually.
@@ -247,9 +248,9 @@ const GodotFS = {
 				if (FS.isFile(stat.mode)) {
 					// If entry is a file, collect its details
 					result[fullPath] = {
-						path: fullPath,
-						modified: stat.mtime.getTime(),
-						size: stat.size,
+						'path': fullPath,
+						'modified': stat.mtime.getTime(),
+						'size': stat.size,
 					};
 					continue;
 				}
@@ -266,6 +267,14 @@ const GodotFS = {
 
 		read_file: function (path, opts) {
 			return FS.readFile(path, opts);
+		},
+
+		unlink_fs: function (path) {
+			const stat = FS.stat(path);
+			if (FS.isDir(stat.mode)) {
+				return FS.rmdir(path);
+			}
+			return FS.unlink(path);
 		}
 	},
 };
