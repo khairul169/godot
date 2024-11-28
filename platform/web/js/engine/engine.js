@@ -214,12 +214,13 @@ const Engine = (function () {
 			 *
 			 * @param {string} path The location where the file will be created.
 			 * @param {ArrayBuffer} buffer The content of the file.
+			 * @param {{atime?: number, mtime?: number}?} opts Write options
 			 */
-			copyToFS: function (path, buffer) {
+			copyToFS: function (path, buffer, opts) {
 				if (this.rtenv == null) {
 					throw new Error('Engine must be inited before copying files');
 				}
-				this.rtenv['copyToFS'](path, buffer);
+				this.rtenv['copyToFS'](path, buffer, opts);
 			},
 
 			/**
@@ -263,7 +264,7 @@ const Engine = (function () {
 			 * Read the content of file.
 			 *
 			 * @param {string} path The file where the content will be read.
-			 * @param {object} opts Read options.
+			 * @param {{encoding?: string, flags?: string}?} opts Read options.
 			 */
 			fsReadFile: function (path, opts) {
 				if (this.rtenv) {

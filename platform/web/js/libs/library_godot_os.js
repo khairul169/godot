@@ -215,7 +215,7 @@ const GodotFS = {
 		},
 
 		// Copies a buffer to the internal file system. Creating directories recursively.
-		copy_to_fs: function (path, buffer) {
+		copy_to_fs: function (path, buffer, opts) {
 			const idx = path.lastIndexOf('/');
 			let dir = '/';
 			if (idx > 0) {
@@ -231,6 +231,10 @@ const GodotFS = {
 				FS.mkdirTree(dir);
 			}
 			FS.writeFile(path, new Uint8Array(buffer));
+
+			if (opts != null && (opts['mtime'] || opts['atime'])) {
+				FS.utime(path, opts['atime'], opts['mtime']);
+			}
 		},
 
 		read_dir: function (path, recursive = false) {
